@@ -1,0 +1,24 @@
+[tool.poetry]
+name = "fast-api"
+version = "0.1.0"
+description = ""
+authors = ["s4ngmin-9 <s4ngmin9@naver.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.13"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 120
+
+[tool.ruff]
+target-version = "py311"
+
+[tool.mypy]
+plugins = ["pydantic.mypy"]
+python_version = 3.11
+strict = true
