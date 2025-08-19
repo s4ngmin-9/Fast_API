@@ -1,0 +1,154 @@
+1. 셸(Shell)이란?
+컴퓨터 운영체제에서 사용자의 명령을 해석하고 실행하는 프로그램입니다.
+사용자가 키보드로 명령어를 입력하면, 이 명령어를 운영체제가 이해할 수 있도록
+변환하여 실행해 주는일종의 명령어 해석기입니다.
+
+대표적으로 bash, zsh, sh 가 있다.
+
+1-2. Shell script 작성법
+
+1. 파일 작성: .sh 확장자로 파일을 만듭니다. (예: script.sh)
+2. Shebang: 파일 맨 위에 #!/bin/bash를 넣어 어떤 셸로 실행할지 지정합니다.
+3. 내용 작성: 터미널에 입력하는 명령어들을 한 줄씩 적습니다.
+4. 문법: 변수($변수명), 조건문(if), 반복문(for) 등을 사용해 복잡한 로직을 구현할 수 있습니다.
+5. 실행:
+● chmod +x script.sh 명령어로 실행 권한을 줍니다. (윈도우는 bash ./test.sh 입력)
+● ./script.sh 명령어로 스크립트를 실행합니다.
+------------------------------------------------------------------------------------------------------------------------
+
+2. Github Actions란?
+
+● GitHub Actions는 소프트웨어 개발 과정을 자동화해주는 GitHub의 서비스입니다.
+● 코드를 올리거나(push) 새로운 기능을 제안할 때(pull request),
+자동으로 테스트를 실행하거나 서비스를 배포하는 등의 반복 작업을 수행합니다.
+● YAML 파일로 어떤 이벤트(Event)에 어떤 작업(Job)을 할지 정의합니다.
+● 개발 효율성을 높이고 버그를 빠르게 찾아내는 데 사용됩니다.
+------------------------------------------------------------------------------------------------------------------------
+
+3. Github Actions 의 동작을 위한 스크립트 작성법
+# 워크플로우 이름
+name: CI/CD Pipeline
+
+# 트리거 이벤트: main 브랜치에 코드를 푸시하거나 풀 리퀘스트를 보낼 때
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+# 실행할 작업(Job) 목록
+jobs:
+  # 'build'라는 이름의 잡
+  build:
+    # 이 잡이 실행될 가상 환경 (최신 우분투)
+    runs-on: ubuntu-latest
+
+    # 잡에서 실행할 스텝(Step) 목록
+    steps:
+      # 1. 저장소 코드 가져오기
+      - uses: actions/checkout@v4
+
+      # 2. Python 환경 설정하기
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      # 3. 의존성 패키지 설치
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      # 4. 테스트 실행
+      - name: Run tests
+        run: pytest
+------------------------------------------------------------------------------------------------------------------------
+
+4. Github Actions에서 Cache의 동작방식
+- 캐시(cache)의 목적
+	: 빌드 시간을 단축하기 위함
+
+- 동작 방식 요약
+● 키(key) 생성: 캐시를 저장할 때 고유한 키(key)를 만듭니다. 이 키는 주로 의존성 파일 목록의 해시값과
+운영체제 정보를 조합하여 만듭니다.
+
+● 캐시 복원: 워크플로우가 시작되면, GitHub Actions는 이전에 저장된 캐시 중에
+현재 키와 일치하는 것이 있는지 확인합니다.
+
+● 일치하는 경우: 캐시가 복원되어 패키지 설치를 건너뛰고 바로 다음 단계로 넘어갑니다.
+
+● 일치하지 않는 경우: 캐시가 없으므로 평소처럼 패키지를 새로 설치합니다.
+
+● 캐시 저장: 모든 스텝이 성공적으로 완료되면, 키를 기반으로 현재 의존성 파일들을 캐시로 저장합니다.
+이렇게 저장된 캐시는 다음 워크플로우 실행 시 재사용될 수 있습니다.
+------------------------------------------------------------------------------------------------------------------------
+
+5. spec API란?
+spec API는 **API 명세(Specification)**의 약어입니다.
+API 명세는 API가 어떻게 동작하는지를 정의하는 문서 또는 규칙의 집합입니다.
+
+5-1 spec API의 활용법
+
+spec API)를 활용하는 방법은 크게 두 가지 관점에서 볼 수 있습니다.
+
+- 생산자(API 제공자): 코드를 기반으로 명세를 자동 생성하고,
+이를 문서화 및 배포하여 효율적인 API 개발을 추구합니다.
+
+- 소비자(API 사용자): 명세를 활용하여 API의 구조를 파악하고, 테스트하며,
+개발 프로세스에 통합하여 의존성을 줄이고 협업을 원활하게 만듭니다.
+------------------------------------------------------------------------------------------------------------------------
+
+6. FastAPI 의 내부에 구현된 모듈, 함수를 이용하여 라우터를 구성하는 법
+
+1. 라우터 모듈 생성:
+
+라우터와 관련된 코드를 담을 별도의 Python 파일을 만듭니다. (예: routers/users.py)
+
+2. APIRouter 객체 생성:
+
+새로운 파일에서 APIRouter 클래스를 가져와 객체를 생성합니다.
+router = APIRouter(prefix="/users")
+prefix 인자는 이 라우터에 포함된 모든 경로의 앞에 붙을 공통 경로를 정의합니다. (예: /users)
+
+3. 경로 함수 작성:
+
+@router.get("/"), @router.post("/")와 같은 데코레이터를 사용하여 API 경로를 정의하고,
+라우터 함수를 작성합니다.
+이제 @app.get 대신 @router.get을 사용합니다.
+
+4. 메인 애플리케이션에 포함:
+
+메인 애플리케이션 파일(main.py 등)에서 router 객체를 가져옵니다.
+app.include_router(router) 메서드를 사용하여 APIRouter 객체를 메인 애플리케이션에 포함시킵니다.
+
+※ 간단 예시
+routers/users.py (라우터 모듈)
+
+from fastapi import APIRouter
+
+router = APIRouter(
+    prefix="/users",
+    tags=["users"],  # Swagger UI에 표시될 태그
+)
+
+@router.get("/")
+async def read_users():
+    return [{"username": "john"}, {"username": "jane"}]
+
+@router.get("/{user_id}")
+async def read_user(user_id: int):
+    return {"user_id": user_id}
+------------------------------------------------------------------------------------------------------------------------
+
+main.py (메인 애플리케이션)
+from fastapi import FastAPI
+from .routers import users  # 라우터 모듈 가져오기
+
+app = FastAPI()
+
+app.include_router(users.router)  # 라우터 포함시키기
+
+@app.get("/")
+async def root():
+    return {"message": "Hello World"}
