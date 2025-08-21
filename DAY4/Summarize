@@ -1,0 +1,62 @@
+1. 데이터베이스 모델 정의
+
+Meeting이라는 이름의 데이터베이스 테이블 모델을 정의합니다.
+id, created_at 필드를 가진 BaseModel을 상속받아 중복을 제거합니다.
+Meeting 테이블은 모임 이름(name), 모임 날짜(meeting_date), 모임 고유 키(url)
+등의 필드를 포함합니다.
+
+url 필드는 unique=True 옵션을 통해 중복될 수 없는 값임을 명시합니다.
+
+2. DTO (Data Transfer Object) 정의
+
+CreateMeetingRequest:
+API 요청 시 클라이언트가 보내는 데이터의 형식을 정의합니다.
+모임 이름(name)과 모임 날짜(meeting_date)를 필드로 가집니다.
+
+CreateMeetingResponse:
+API 응답 시 서버가 클라이언트에게 보내는 데이터의 형식을 정의합니다.
+생성된 모임의 고유 url을 포함합니다.
+
+3. 서비스 계층 구현
+
+MeetingService 클래스:
+실제 비즈니스 로직을 처리하는 부분입니다.
+create_meeting 메서드는 CreateMeetingRequest DTO를 입력받아
+새로운 모임을 생성하는 로직을 담당합니다.
+
+모임 생성 로직:
+Meeting 모델 객체를 생성하여 데이터베이스에 저장(save())합니다.
+저장 후 생성된 id 값을 가져옵니다.
+
+base62.encode() 유틸리티 함수를 사용하여 id를 짧은 URL 문자열로 변환합니다.
+변환된 url 값을 다시 해당 Meeting 객체에 업데이트하고 저장합니다.
+최종적으로 생성된 url을 포함하는 CreateMeetingResponse DTO를 반환합니다.
+
+의존성 주입:
+Annotated[MeetingService, Depends(MeetingService)] 구문을 사용하여
+MeetingService를 라우터에 주입할 수 있도록 준비합니다.
+
+4. API 라우터 구현
+
+엔드포인트:
+POST /meetings 경로로 API 엔드포인트를 생성합니다.
+
+요청 및 응답:
+CreateMeetingRequest DTO를 요청 본문으로 받습니다.
+CreateMeetingResponse DTO를 성공 응답 모델로 지정하며,
+성공 시 HTTP 상태 코드를 반환합니다.
+
+로직 처리:
+의존성 주입을 통해 받은 MeetingService 객체의 create_meeting 메서드를 호출하여
+실제 모임 생성 로직을 위임합니다.
+
+5. 테스트 코드 작성
+
+TestMeetingRouter 클래스:
+test_api_create_meeting_mysql라는 이름의 비동기 테스트 함수를 정의합니다.
+
+테스트 과정:
+AsyncClient를 사용하여 POST /v1/meetings 엔드포인트에 테스트용 데이터를 전송합니다.
+응답 상태 코드가 201 (Created)인지 확인합니다.
+응답으로 받은 JSON 데이터에 url 키가 포함되어 있는지 확인합니다.
+데이터베이스에 해당 모임 정보가 실제로 저장되었는지 Meeting.all().count()를 통해 검증합니다.
