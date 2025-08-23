@@ -47,7 +47,6 @@ class MovieModel:
 
     @classmethod
     def delete(cls, movie_id: int):
-        """ID에 해당하는 영화를 데이터베이스에서 삭제합니다."""
         if movie_id in _db:
             del _db[movie_id]
             return True
