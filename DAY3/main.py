@@ -1,5 +1,3 @@
-# app/main.py
-
 from fastapi import FastAPI
 from app.models.users import UserModel
 from app.models.movies import MovieModel
@@ -9,11 +7,9 @@ from typing import List
 from fastapi import Path, Depends, status
 
 # FastAPI 애플리케이션 인스턴스 생성
-# Create a FastAPI application instance.
 app = FastAPI()
 
 # --- 유저 관련 라우터 ---
-# User related routers
 @app.post("/users/", response_model=UserRead)
 async def create_user(user_data: UserCreate):
     new_user = UserModel.create(
@@ -68,7 +64,6 @@ async def search_users(params: UserSearch = Depends()):
     return users
 
 # --- 영화 관련 라우터 ---
-# Movie related routers
 @app.post("/movies/", response_model=List[MovieRead], status_code=status.HTTP_201_CREATED)
 async def create_movie(movie_data: MovieCreate):
     MovieModel.create(

@@ -1,42 +1,54 @@
-# FastAPI 유저 관리 API
+# 🎬 FastAPI User & Movie API
 
-이 프로젝트는 FastAPI를 사용하여 기본적인 유저(User) 관리 기능을 제공하는 RESTful API입니다.
-CRUD(Create, Read, Update, Delete) 및 검색 기능을 포함하고 있으며, Pydantic을 활용한 데이터 유효성 검증과 파일 구조 분리를 통해 확장성과 유지보수성을 고려하여 설계되었습니다.
+FastAPI 기반의 **유저 관리** 및 **영화 관리** API 프로젝트입니다.  
+JWT 인증, OAuth2 로그인, CRUD API 라우팅, 비밀번호 해싱 등 다양한 기능을 포함합니다.
 
----
-
-## 🚀 주요 기능
-
--   **유저 생성 (Create)**: `POST /users/`
-    -   `username`, `age`, `gender` 정보를 받아 유저를 생성합니다.
--   **모든 유저 조회 (Read)**: `GET /users/`
-    -   등록된 모든 유저 정보를 리스트 형태로 반환합니다.
--   **특정 유저 조회 (Read)**: `GET /users/{user_id}`
-    -   경로 매개변수로 받은 `user_id`에 해당하는 유저 정보를 반환합니다.
--   **유저 정보 업데이트 (Update)**: `PUT /users/{user_id}`
-    -   `user_id`에 해당하는 유저의 `username`과 `age`를 업데이트합니다.
--   **유저 삭제 (Delete)**: `DELETE /users/{user_id}`
-    -   `user_id`에 해당하는 유저를 삭제합니다.
--   **유저 검색 (Search)**: `GET /users/search/`
-    -   `username`, `age`, `gender`를 쿼리 매개변수로 받아 유저를 검색합니다.
 
 ---
 
-## 🛠️ 설치 및 실행
+## 🚀 기능 개요
 
-### 1. 의존성 설치
+### 1. API Router 분리
+- **`app/routers/users.py`**  
+  - 유저 생성, 조회, 수정, 삭제, 검색 기능 구현
+- **`app/routers/movies.py`**  
+  - 영화 생성, 조회, 수정, 삭제, 검색 기능 구현
+- `main.py`에서 `include_router()`로 등록하여 API 엔드포인트 구성
 
-프로젝트의 의존성 관리를 위해 Poetry를 사용합니다.
-
-```bash
-# Poetry 설치 (설치되어 있지 않다면)
-pip install poetry
-
-# 프로젝트 의존성 설치
-poetry install
-```
 ---
-🌐 API 문서
-서버가 실행되면, 다음 URL에서 자동으로 생성된 API 문서를 확인할 수 있습니다.
 
-Swagger UI: http://127.0.0.1:8000/docs
+### 2. 유저 비밀번호 처리 & 인증
+`app/models/users.py`  
+- **`get_hashed_password()`** : Passlib + Bcrypt로 비밀번호 해싱  
+- **`verify_password()`** : 평문 비밀번호와 해시 비교  
+- **`authenticate()`** : username + password로 사용자 인증  
+
+---
+
+### 3. JWT 유틸리티
+`app/utils/jwt.py`
+- **`create_access_token(data: dict)`**
+  - HS256 알고리즘, 30분 만료의 JWT 생성
+- **`get_current_user()`**
+  - OAuth2 Bearer 토큰 검증 후 현재 유저 반환
+  - 토큰 검증 실패 시 `401 Unauthorized` 반환
+
+---
+
+### 4. 로그인 API
+`POST /users/login`
+- FormData(`username`, `password`) 입력
+- `OAuth2PasswordRequestForm` 사용하여 데이터 검증
+- `UserModel.authenticate()`로 인증
+- 성공 시:
+  - `last_login` 갱신
+  - JWT Access Token 발급
+- 실패 시:
+  - `401 Unauthorized` 응답
+
+**응답 예시**
+```json
+{
+  "access_token": "eyJhbGciOiJIUzI1...",
+  "token_type": "bearer"
+}
