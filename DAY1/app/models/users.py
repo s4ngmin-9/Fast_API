@@ -1,66 +1,58 @@
-import random
-from typing import Dict, Any, Optional, List, Self
+# app/models/users.py
+
+_db = {}
+_id_counter = 0
 
 
 class UserModel:
-    _data: List["UserModel"] = []  # 전체 사용자 데이터를 저장하는 리스트
-    _id_counter: int = 1  # ID 자동 증가를 위한 카운터
-
-    def __init__(self, username: str, age: int, gender: str) -> None:
-        self.id: int = UserModel._id_counter
-        self.username: str = username
-        self.age: int = age
-        self.gender: str = gender
-
-        # 클래스가 인스턴스화 될 때 _data에 추가하고 _id_counter를 증가시킴
-        UserModel._data.append(self)
-        UserModel._id_counter += 1
+    def __init__(self, user_id: int, username: str, age: int, gender):
+        self.id = user_id
+        self.username = username
+        self.age = age
+        self.gender = gender
 
     @classmethod
-    def create(cls, username: str, age: int, gender: str) -> "UserModel":
-        """ 새로운 유저 추가 """
-        return cls(username, age, gender)
+    def create(cls, username: str, age: int, gender):
+        global _id_counter
+        _id_counter += 1
+        new_user = cls(user_id=_id_counter, username=username, age=age, gender=gender)
+        _db[new_user.id] = new_user
+        return new_user
 
     @classmethod
-    def get(cls, **kwargs: Any) -> Optional["UserModel"]:
-        """ 단일 객체를 반환 (없으면 None) """
-        for user in cls._data:
-            if all(getattr(user, key) == value for key, value in kwargs.items()):
-                return user
-        return None
+    def get_by_id(cls, user_id: int):
+        return _db.get(user_id)
 
     @classmethod
-    def filter(cls, **kwargs: Any) -> List["UserModel"]:
-        """ 조건에 맞는 객체 리스트 반환 """
-        return [
-            user
-            for user in cls._data
-            if all(getattr(user, key) == value for key, value in kwargs.items())
-        ]
+    def all(cls):
+        return list(_db.values())
 
-    def update(self, **kwargs: Any) -> None:
-        """ 객체의 필드 업데이트 """
-        for key, value in kwargs.items():
-            if hasattr(self, key) and value is not None:
-                setattr(self, key, value)
-
-    def delete(self) -> None:
-        """현재 인스턴스를 _data 리스트에서 삭제"""
-        if self in UserModel._data:
-            UserModel._data.remove(self)
+    def update(self, user_data):
+        if user_data.username is not None:
+            self.username = user_data.username
+        if user_data.age is not None:
+            self.age = user_data.age
 
     @classmethod
-    def all(cls) -> List["UserModel"]:
-        """ 모든 사용자 반환 """
-        return cls._data
+    def delete(cls, user_id: int):
+        if user_id in _db:
+            del _db[user_id]
+            return True
+        return False
 
     @classmethod
-    def create_dummy(cls) -> None:
-        for i in range(1, 11):
-            cls(username=f'dummy{i}', age=15 + i, gender=random.choice(['male', 'female']))
+    def search(cls, username: str | None = None, age: int | None = None, gender=None):
+        results = []
+        for user in _db.values():
+            match = True
+            if username is not None and username.lower() not in user.username.lower():
+                match = False
+            if age is not None and user.age != age:
+                match = False
+            if gender is not None and user.gender != gender:
+                match = False
 
-    def __repr__(self) -> str:
-        return f"UserModel(id={self.id}, username='{self.username}', age={self.age}, gender='{self.gender}')"
+            if match:
+                results.append(user)
 
-    def __str__(self) -> str:
-        return self.username
+        return results
