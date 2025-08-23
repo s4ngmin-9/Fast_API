@@ -22,18 +22,21 @@ CRUD(Create, Read, Update, Delete) 및 검색 기능을 포함하고 있으며, 
 
 ---
 
-## 📦 프로젝트 구조
+## 🛠️ 설치 및 실행
 
-이 프로젝트는 다음과 같은 모범 사례를 따르는 구조로 구성되어 있습니다.
+### 1. 의존성 설치
 
-.
-├── app/
-│   ├── models/           # 데이터 모델 (임시 DB 역할)
-│   │   └── users.py
-│   ├── schemas/          # Pydantic 데이터 검증/응답 모델
-│   │   └── users.py
-│   └── init.py
-├── main.py               # FastAPI 애플리케이션의 진입점
-├── poetry.lock
-├── pyproject.toml
-└── README.md
+프로젝트의 의존성 관리를 위해 Poetry를 사용합니다.
+
+```bash
+# Poetry 설치 (설치되어 있지 않다면)
+pip install poetry
+
+# 프로젝트 의존성 설치
+poetry install
+```
+---
+🌐 API 문서
+서버가 실행되면, 다음 URL에서 자동으로 생성된 API 문서를 확인할 수 있습니다.
+
+Swagger UI: http://127.0.0.1:8000/docs
